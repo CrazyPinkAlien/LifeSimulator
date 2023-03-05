@@ -1,6 +1,6 @@
 // Functionality for people
-
-use bevy::{ecs::component::Component, prelude::Bundle};
+use bevy::ecs::component::Component;
+use bevy::prelude::Bundle;
 use chrono::NaiveDate;
 
 pub mod player;
@@ -26,8 +26,22 @@ impl HasAge for Birthday {
     }
 }
 
+// Struct to represent a relationship with another person
+#[derive(Component)]
+#[component(storage = "SparseSet")]
+pub struct Relationship {
+    pub person: &'static PersonBundle,
+    pub friendship: u32,
+}
+
+#[derive(Component)]
+pub struct Relationships {
+    pub relationships: Vec<Relationship>,
+}
+
 #[derive(Bundle)]
-struct PersonBundle {
-    name: Name,
+pub struct PersonBundle {
+    pub name: Name,
     birthday: Birthday,
+    relationships: Relationships,
 }

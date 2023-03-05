@@ -3,12 +3,12 @@ use bevy::app::{App, Plugin};
 use bevy::ecs::system::{ResMut, Res};
 use bevy::prelude::{Resource, With, Query, IntoSystemDescriptor};
 use bevy_egui::EguiContext;
-use bevy_egui::egui::{CentralPanel, SidePanel, DragValue};
+use bevy_egui::egui::{CentralPanel, SidePanel, DragValue, ProgressBar};
 use bevy_egui::egui::widgets::Button;
 use chrono::{Datelike, NaiveDate};
 
 use crate::CurrentDateTime;
-use crate::person::{Name, Birthday, HasAge};
+use crate::person::{Name, Birthday, HasAge, Relationships};
 use crate::person::player::Player;
 
 // UI States
@@ -48,7 +48,7 @@ fn left_side_menu(mut ui_state: ResMut<CurrentUIState>, mut egui_context: ResMut
 }
 
 // UI for the main menu
-fn main_menu_ui(ui_state: Res<CurrentUIState>, date_time: Res<CurrentDateTime>, mut egui_context: ResMut<EguiContext>, player_query: Query<(&Name, &Birthday), With<Player>>) {
+fn main_menu_ui(ui_state: Res<CurrentUIState>, date_time: Res<CurrentDateTime>, mut egui_context: ResMut<EguiContext>, player_query: Query<(&Name, &Birthday, &Relationships), With<Player>>) {
     if ui_state.0 == UIState::MainMenu && !player_query.is_empty() {
         // Get player info
         let player_info = player_query.single();
@@ -59,6 +59,13 @@ fn main_menu_ui(ui_state: Res<CurrentUIState>, date_time: Res<CurrentDateTime>, 
             ui.heading("Main Menu");
             ui.label(format!("{} {}", player_name.first.clone(), player_name.last.clone()));
             ui.label(format!("Age: {}", player_age.get_age(date_time.0.date()).to_string()));
+            ui.heading("Friendships");
+            for friend in &player_info.2.relationships {
+                ui.horizontal(|ui| {
+                    ui.label(format!("{} {}", friend.person.name.first, friend.person.name.first));
+                    ui.add(ProgressBar::new((friend.friendship as f32) / 100.0));
+                });
+            }
         });
     }
 }
