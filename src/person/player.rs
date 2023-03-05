@@ -1,7 +1,8 @@
 // Functionality specific to the player
 
 use bevy::prelude::{Bundle, Component, Commands};
-use super::{PersonBundle, Name, Age};
+use chrono::NaiveDate;
+use super::{PersonBundle, Name, Birthday};
 
 // Tag to identify the player
 #[derive(Component)]
@@ -18,7 +19,7 @@ struct PlayerBundle {
 pub fn setup_player(mut commands: Commands) {
     commands.spawn(
         PlayerBundle {
-            person: PersonBundle{ name: Name {first: "Emily".to_string(), last: "Tyler".to_string()}, age: Age {age: 27}},
+            person: PersonBundle{ name: Name {first: "Emily".to_string(), last: "Tyler".to_string()}, birthday: Birthday { date: NaiveDate::from_ymd_opt(1995, 6, 16).unwrap()}},
             _p: Player
         }
     );

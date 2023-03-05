@@ -5,8 +5,10 @@ use bevy::prelude::{Resource, With, Query, IntoSystemDescriptor};
 use bevy_egui::EguiContext;
 use bevy_egui::egui::{CentralPanel, SidePanel, DragValue};
 use bevy_egui::egui::widgets::Button;
+use chrono::{Datelike, NaiveDate};
 
-use crate::person::{Name, Age};
+use crate::CurrentDateTime;
+use crate::person::{Name, Birthday, HasAge};
 use crate::person::player::Player;
 
 // UI States
@@ -46,7 +48,7 @@ fn left_side_menu(mut ui_state: ResMut<CurrentUIState>, mut egui_context: ResMut
 }
 
 // UI for the main menu
-fn main_menu_ui(ui_state: Res<CurrentUIState>, mut egui_context: ResMut<EguiContext>, player_query: Query<(&Name, &Age), With<Player>>) {
+fn main_menu_ui(ui_state: Res<CurrentUIState>, date_time: Res<CurrentDateTime>, mut egui_context: ResMut<EguiContext>, player_query: Query<(&Name, &Birthday), With<Player>>) {
     if ui_state.0 == UIState::MainMenu && !player_query.is_empty() {
         // Get player info
         let player_info = player_query.single();
@@ -56,18 +58,22 @@ fn main_menu_ui(ui_state: Res<CurrentUIState>, mut egui_context: ResMut<EguiCont
         CentralPanel::default().show(egui_context.ctx_mut(), |ui| {
             ui.heading("Main Menu");
             ui.label(format!("{} {}", player_name.first.clone(), player_name.last.clone()));
-            ui.label(format!("Age: {}", player_age.age.to_string()));
+            ui.label(format!("Age: {}", player_age.get_age(date_time.0.date()).to_string()));
         });
     }
 }
 
 // UI showing player info
-fn player_info_ui(ui_state: Res<CurrentUIState>, mut egui_context: ResMut<EguiContext>, mut player_query: Query<(&mut Name, &mut Age), With<Player>>) {
+fn player_info_ui(ui_state: Res<CurrentUIState>, date_time: Res<CurrentDateTime>, mut egui_context: ResMut<EguiContext>, mut player_query: Query<(&mut Name, &mut Birthday), With<Player>>) {
     if ui_state.0 == UIState::PlayerInfo && !player_query.is_empty() {
         // Get player info
         let player_info = player_query.single_mut();
         let mut player_name = player_info.0;
-        let mut player_age = player_info.1;
+        let mut player_bday = player_info.1.as_ref();
+        // Variables for player birthday
+        let mut birth_year = player_bday.date.year();
+        let mut birth_month = player_bday.date.month();
+        let mut birth_day = player_bday.date.day();
         // Draw UI
         CentralPanel::default().show(egui_context.ctx_mut(), |ui| {
             ui.heading("Player Info");
@@ -75,8 +81,16 @@ fn player_info_ui(ui_state: Res<CurrentUIState>, mut egui_context: ResMut<EguiCo
             ui.text_edit_singleline(&mut player_name.first);
             ui.label("Last Name:");
             ui.text_edit_singleline(&mut player_name.last);
+            ui.label("Birthday:");
+            ui.horizontal(|ui| {
+                ui.add(DragValue::new(&mut birth_day));
+                ui.add(DragValue::new(&mut birth_month));
+                ui.add(DragValue::new(&mut birth_year));
+            });
             ui.label("Age:");
-            ui.add(DragValue::new(&mut player_age.age));
+            ui.label(player_bday.get_age(date_time.0.date()).to_string());
         });
+        // Update birthday
+        player_bday = &Birthday { date: NaiveDate::from_ymd_opt(birth_year, birth_month, birth_day).unwrap() };
     }
 }
