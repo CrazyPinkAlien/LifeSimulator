@@ -69,7 +69,7 @@ fn player_info_ui(ui_state: Res<CurrentUIState>, date_time: Res<CurrentDateTime>
         // Get player info
         let player_info = player_query.single_mut();
         let mut player_name = player_info.0;
-        let mut player_bday = player_info.1.as_ref();
+        let mut player_bday = player_info.1;
         // Variables for player birthday
         let mut birth_year = player_bday.date.year();
         let mut birth_month = player_bday.date.month();
@@ -91,6 +91,6 @@ fn player_info_ui(ui_state: Res<CurrentUIState>, date_time: Res<CurrentDateTime>
             ui.label(player_bday.get_age(date_time.0.date()).to_string());
         });
         // Update birthday
-        player_bday = &Birthday { date: NaiveDate::from_ymd_opt(birth_year, birth_month, birth_day).unwrap() };
+        *player_bday = Birthday { date: NaiveDate::from_ymd_opt(birth_year, birth_month, birth_day).unwrap() };
     }
 }
