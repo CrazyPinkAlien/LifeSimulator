@@ -1,12 +1,7 @@
 // Functionality specific to the player
-
 use bevy::prelude::{Bundle, Component, Commands};
 use chrono::NaiveDate;
 use super::{PersonBundle, Name, Birthday, Relationships, Relationship};
-
-// Tag to identify the player
-#[derive(Component)]
-pub struct Player;
 
 // Bundle of components that comprise a player
 #[derive(Bundle)]
@@ -14,6 +9,14 @@ struct PlayerBundle {
     _p: Player,
     person: PersonBundle,
 }
+
+// Components
+
+// Tag to identify the player
+#[derive(Component)]
+pub struct Player;
+
+// Startup Systems
 
 // Setup function for the player
 pub fn setup_player(mut commands: Commands) {

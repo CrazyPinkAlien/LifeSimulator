@@ -5,9 +5,9 @@ use bevy_egui::EguiPlugin;
 use chrono::{NaiveDateTime, NaiveDate};
 
 use crate::ui::UIPlugin;
-use crate::person::player::setup_player;
+use crate::core::CorePlugin;
 
-pub mod person;
+pub mod core;
 pub mod ui;
 
 fn main() {
@@ -15,10 +15,9 @@ fn main() {
         .add_plugins(DefaultPlugins)
         .add_plugin(EguiPlugin)
         .add_plugin(UIPlugin)
+        .add_plugin(CorePlugin)
 
         .insert_resource(CurrentDateTime(NaiveDate::from_ymd_opt(2023, 3, 5).unwrap().and_hms_opt(0, 0, 0).unwrap()))
-
-        .add_startup_system(setup_player)
 
         .run();
 }

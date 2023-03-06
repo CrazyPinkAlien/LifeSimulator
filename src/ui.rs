@@ -1,4 +1,4 @@
-// UI functonality
+// UI functionality
 use bevy::app::{App, Plugin};
 use bevy::ecs::system::{ResMut, Res};
 use bevy::prelude::{Resource, With, Query, IntoSystemDescriptor};
@@ -8,8 +8,8 @@ use bevy_egui::egui::widgets::Button;
 use chrono::{Datelike, NaiveDate};
 
 use crate::CurrentDateTime;
-use crate::person::{Name, Birthday, HasAge, Relationships};
-use crate::person::player::Player;
+use crate::core::person::{Name, Birthday, HasAge, Relationships};
+use crate::core::person::player::Player;
 
 // UI States
 #[derive(PartialEq)]
@@ -34,6 +34,8 @@ impl Plugin for UIPlugin {
             .add_system(player_info_ui.after(left_side_menu));
     }
 }
+
+// Systems
 
 // Left hand side menu
 fn left_side_menu(mut ui_state: ResMut<CurrentUIState>, mut egui_context: ResMut<EguiContext>) {
