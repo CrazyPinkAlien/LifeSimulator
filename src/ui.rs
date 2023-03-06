@@ -1,4 +1,5 @@
 // UI functionality
+use std::iter::zip;
 use bevy::app::{App, Plugin};
 use bevy::ecs::system::{ResMut, Res};
 use bevy::prelude::{Resource, With, Query, IntoSystemDescriptor};
@@ -8,8 +9,10 @@ use bevy_egui::egui::widgets::Button;
 use chrono::{Datelike, NaiveDate};
 
 use crate::CurrentDateTime;
-use crate::core::person::{Name, Birthday, HasAge, Relationships};
+use crate::core::occupation::Occupation;
+use crate::core::person::{Name, Birthday, HasAge};
 use crate::core::person::player::Player;
+use crate::core::relationships::Relationships;
 
 // UI States
 #[derive(PartialEq)]
@@ -62,10 +65,10 @@ fn main_menu_ui(ui_state: Res<CurrentUIState>, date_time: Res<CurrentDateTime>, 
             ui.label(format!("{} {}", player_name.first.clone(), player_name.last.clone()));
             ui.label(format!("Age: {}", player_age.get_age(date_time.0.date()).to_string()));
             ui.heading("Friendships");
-            for friend in &player_info.2.relationships {
+            for (friend, friendship) in zip(&player_info.2.people, &player_info.2.friendships) {
                 ui.horizontal(|ui| {
-                    ui.label(format!("{} {}", friend.person.name.first, friend.person.name.first));
-                    ui.add(ProgressBar::new((friend.friendship as f32) / 100.0));
+                    ui.label(format!("{} {}", friend.name.first, friend.name.first));
+                    ui.add(ProgressBar::new((*friendship as f32) / 100.0));
                 });
             }
         });
@@ -73,29 +76,34 @@ fn main_menu_ui(ui_state: Res<CurrentUIState>, date_time: Res<CurrentDateTime>, 
 }
 
 // UI showing player info
-fn player_info_ui(ui_state: Res<CurrentUIState>, date_time: Res<CurrentDateTime>, mut egui_context: ResMut<EguiContext>, mut player_query: Query<(&mut Name, &mut Birthday), With<Player>>) {
+fn player_info_ui(ui_state: Res<CurrentUIState>, date_time: Res<CurrentDateTime>, mut egui_context: ResMut<EguiContext>, mut player_query: Query<(&mut Name, &mut Birthday, &Occupation), With<Player>>) {
     if ui_state.0 == UIState::PlayerInfo && !player_query.is_empty() {
         // Get player info
         let player_info = player_query.single_mut();
         let mut player_name = player_info.0;
         let mut player_bday = player_info.1;
+        let occupation = player_info.2;
         // Variables for player birthday
         let mut birth_year = player_bday.date.year();
         let mut birth_month = player_bday.date.month();
         let mut birth_day = player_bday.date.day();
         // Draw UI
         CentralPanel::default().show(egui_context.ctx_mut(), |ui| {
+            // Title
             ui.heading("Player Info");
+            // Name
             ui.label("First Name:");
             ui.text_edit_singleline(&mut player_name.first);
             ui.label("Last Name:");
             ui.text_edit_singleline(&mut player_name.last);
+            // Birthday
             ui.label("Birthday:");
             ui.horizontal(|ui| {
                 ui.add(DragValue::new(&mut birth_day));
                 ui.add(DragValue::new(&mut birth_month));
                 ui.add(DragValue::new(&mut birth_year));
             });
+            // Age
             ui.label("Age:");
             ui.label(player_bday.get_age(date_time.0.date()).to_string());
         });

@@ -3,24 +3,28 @@ use bevy::ecs::component::Component;
 use bevy::prelude::Bundle;
 use chrono::NaiveDate;
 
+use super::occupation::Occupation;
+use super::relationships::Relationships;
+
 pub mod player;
 
-#[derive(Bundle)]
+#[derive(Bundle, PartialEq)]
 pub struct PersonBundle {
     pub name: Name,
     birthday: Birthday,
-    relationships: Relationships,
+    pub relationships: Relationships,
+    occupation: Occupation,
 }
 
 // Components
 
-#[derive(Component)]
+#[derive(Component, PartialEq)]
 pub struct Name {
     pub first: String,
     pub last: String,
 }
 
-#[derive(Component, Copy, Clone)]
+#[derive(Component, Copy, Clone, PartialEq)]
 pub struct Birthday {
     pub date: NaiveDate,
 }
@@ -38,16 +42,4 @@ impl HasAge for Birthday {
             return 0;
         }
     }
-}
-
-// Struct to represent a relationship with another person
-#[derive(Component)]
-pub struct Relationship {
-    pub person: &'static PersonBundle,
-    pub friendship: u32,
-}
-
-#[derive(Component)]
-pub struct Relationships {
-    pub relationships: Vec<Relationship>,
 }
