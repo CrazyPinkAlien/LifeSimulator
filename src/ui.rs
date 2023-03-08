@@ -8,10 +8,11 @@ use bevy_egui::egui::{CentralPanel, SidePanel, DragValue, ProgressBar};
 use bevy_egui::egui::widgets::Button;
 use chrono::{Datelike, NaiveDate};
 
-use crate::CurrentDateTime;
+use crate::core::time::CurrentDateTime;
 use crate::core::occupation::Occupation;
-use crate::core::person::{Name, Birthday, HasAge};
-use crate::core::person::player::Player;
+use crate::core::person::Name;
+use crate::core::person::birthday::{Birthday, HasAge};
+use crate::core::player::Player;
 use crate::core::relationships::Relationships;
 
 // UI States

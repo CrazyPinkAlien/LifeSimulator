@@ -3,7 +3,9 @@ use bevy::prelude::{Bundle, Component, Commands};
 use chrono::NaiveDate;
 
 use crate::core::occupation::{Occupation, OccupationType::*};
-use super::{PersonBundle, Name, Birthday, Relationships};
+use crate::core::person::{PersonBundle, Name};
+use super::person::birthday::Birthday;
+use super::relationships::Relationships;
 
 // Bundle of components that comprise a player
 #[derive(Bundle)]
