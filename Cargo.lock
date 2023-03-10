@@ -2151,6 +2151,7 @@ dependencies = [
  "bevy_egui",
  "chrono",
  "egui 0.21.0",
+ "random-string",
 ]
 
 [[package]]
@@ -2725,6 +2726,15 @@ name = "radsort"
 version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "17fd96390ed3feda12e1dfe2645ed587e0bea749e319333f104a33ff62f77a0b"
+
+[[package]]
+name = "random-string"
+version = "1.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cf4e63111ec5292d8af9c220f06fe3bb87991cc78b6f1f7e291d1ae6b8a60817"
+dependencies = [
+ "fastrand",
+]
 
 [[package]]
 name = "range-alloc"

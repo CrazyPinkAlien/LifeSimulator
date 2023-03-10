@@ -1,8 +1,9 @@
 // UI functionality
 use std::iter::zip;
 use bevy::app::{App, Plugin};
+use bevy::ecs::query::WorldQuery;
 use bevy::ecs::system::{ResMut, Res};
-use bevy::prelude::{Resource, With, Query, IntoSystemDescriptor};
+use bevy::prelude::{Resource, With, Query, IntoSystemDescriptor, Commands, World};
 use bevy_egui::EguiContext;
 use bevy_egui::egui::{CentralPanel, SidePanel, DragValue, ProgressBar};
 use bevy_egui::egui::widgets::Button;
@@ -10,7 +11,7 @@ use chrono::{Datelike, NaiveDate};
 
 use crate::core::time::CurrentDateTime;
 use crate::core::occupation::Occupation;
-use crate::core::person::Name;
+use crate::core::person::{Name, spawn_random_person, PersonBundle};
 use crate::core::person::birthday::{Birthday, HasAge};
 use crate::core::player::Player;
 use crate::core::relationships::Relationships;
@@ -20,6 +21,7 @@ use crate::core::relationships::Relationships;
 enum UIState {
     MainMenu,
     PlayerInfo,
+    Social,
 }
 
 // Current UI state
@@ -35,7 +37,8 @@ impl Plugin for UIPlugin {
             .insert_resource(CurrentUIState(UIState::MainMenu))
             .add_system(left_side_menu)
             .add_system(main_menu_ui.after(left_side_menu))
-            .add_system(player_info_ui.after(left_side_menu));
+            .add_system(player_info_ui.after(left_side_menu))
+            .add_system(social_menu_ui.after(left_side_menu));
     }
 }
 
@@ -49,6 +52,9 @@ fn left_side_menu(mut ui_state: ResMut<CurrentUIState>, mut egui_context: ResMut
         }
         if ui.add(Button::new("Player Info")).clicked() {
             ui_state.0 = UIState::PlayerInfo;
+        }
+        if ui.add(Button::new("Social")).clicked() {
+            ui_state.0 = UIState::Social;
         }
     });
 }
@@ -110,5 +116,43 @@ fn player_info_ui(ui_state: Res<CurrentUIState>, date_time: Res<CurrentDateTime>
         });
         // Update birthday
         *player_bday = Birthday { date: NaiveDate::from_ymd_opt(birth_year, birth_month, birth_day).unwrap() };
+    }
+}
+
+// UI for the social menu
+fn social_menu_ui(ui_state: Res<CurrentUIState>, mut player_query: Query<&mut Relationships, With<Player>>, mut egui_context: ResMut<EguiContext>, mut commands: Commands, world: World) {
+    if ui_state.0 == UIState::Social && !player_query.is_empty() {
+        // Get player relationships
+        let mut relationships = player_query.single_mut();
+        // Draw UI
+        CentralPanel::default().show(egui_context.ctx_mut(), |ui| {
+            // Title
+            ui.heading("Social");
+            // Create grid with two columns
+            ui.columns(2, |columns| {
+                // List of friends
+                columns[0].label("Friends:");
+                for i in 0..relationships.people.len() {
+                    let friend = relationships.people[i];
+                    let level = relationships.friendships[i];
+                    columns[0].horizontal(|ui| {
+                        ui.label(format!("{} {}", friend.name.first, friend.name.last));
+                        ui.add(ProgressBar::new(level as f32 / 100.0));
+                    });
+                }
+
+                // Activities for meeting people
+                if columns[1].add(Button::new("Meet People")).clicked() {
+                    let numPeopleToMeet = 5;
+                    for i in 0..numPeopleToMeet {
+                        // Spawn a new random person
+                        let new_person_id = spawn_random_person(&mut commands);
+                        // Add the new person to player relationships
+                        relationships.people.push(world.entity(new_person_id).get::<PersonBundle>().unwrap());
+                        relationships.friendships.push(10);
+                    }
+                }
+            });
+        });
     }
 }
