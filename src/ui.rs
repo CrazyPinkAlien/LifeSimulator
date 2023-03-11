@@ -9,6 +9,7 @@ use bevy_egui::egui::{CentralPanel, SidePanel, DragValue, ProgressBar};
 use bevy_egui::egui::widgets::Button;
 use chrono::{Datelike, NaiveDate};
 
+use crate::core::hobby::Hobbies;
 use crate::core::time::CurrentDateTime;
 use crate::core::occupation::Occupation;
 use crate::core::person::{Name, spawn_random_person, PersonBundle};
@@ -120,7 +121,7 @@ fn player_info_ui(ui_state: Res<CurrentUIState>, date_time: Res<CurrentDateTime>
 }
 
 // UI for the social menu
-fn social_menu_ui(ui_state: Res<CurrentUIState>, mut player_query: Query<&mut Relationships, With<Player>>, mut egui_context: ResMut<EguiContext>, mut commands: Commands, world: World) {
+fn social_menu_ui(ui_state: Res<CurrentUIState>, mut player_query: Query<&mut Relationships, With<Player>>, mut egui_context: ResMut<EguiContext>, hobbies: Res<Hobbies>) {
     if ui_state.0 == UIState::Social && !player_query.is_empty() {
         // Get player relationships
         let mut relationships = player_query.single_mut();
@@ -142,15 +143,17 @@ fn social_menu_ui(ui_state: Res<CurrentUIState>, mut player_query: Query<&mut Re
                 }
 
                 // Activities for meeting people
-                if columns[1].add(Button::new("Meet People")).clicked() {
-                    let numPeopleToMeet = 5;
-                    for i in 0..numPeopleToMeet {
-                        // Spawn a new random person
-                        let new_person_id = spawn_random_person(&mut commands);
-                        // Add the new person to player relationships
-                        relationships.people.push(world.entity(new_person_id).get::<PersonBundle>().unwrap());
-                        relationships.friendships.push(10);
-                    }
+                if columns[1].add(Button::new("Join Club")).clicked() {
+                    Window::new("clubs_window").show(ctx, |ui| {
+                        ui.label("Clubs");
+                        for hobby in hobbies.hobbies {
+                            if hobby.clubs.len() > 0 {
+                                if columns[1].add(Button::new(hobby.name)).clicked() {
+
+                                }
+                            }
+                        }
+                    });
                 }
             });
         });

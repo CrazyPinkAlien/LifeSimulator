@@ -26,3 +26,8 @@ impl HasAge for Birthday {
         }
     }
 }
+
+pub fn random_birthday() -> Birthday {
+    // TODO: Make this random
+    return Birthday { date: NaiveDate::from_ymd_opt(1995, 6, 16).unwrap()};
+}

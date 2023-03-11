@@ -1,7 +1,8 @@
 // Functionality for occupations such as work and school
-use bevy::prelude::{Component, Changed, Query};
+use bevy::prelude::{Component, Changed, Query, Commands};
 
-use super::{person::PersonBundle, relationships::Relationships};
+use super::{person::Name, relationships::Relationships, Populatable};
+use crate::core::occupation::OccupationType::Unemployed;
 
 // Enum for occupation types
 #[derive(PartialEq)]
@@ -21,7 +22,19 @@ pub enum OccupationType {
 pub struct Occupation {
     pub kind: OccupationType,
     pub name: String,
-    pub workers: Vec<&'static PersonBundle>,
+    pub workers: Vec<&'static Name>,
+}
+
+impl Populatable for Occupation {
+    fn populate(&self, mut commands: Commands) {
+        // TODO: implement
+    }
+}
+
+// Functions (Not systems)
+pub fn random_occupation() -> Occupation {
+    // TODO: Make this random
+    return Occupation {kind: Unemployed, name: "N/A".to_owned(), workers: Vec::new()};
 }
 
 // Systems
