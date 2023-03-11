@@ -1,11 +1,13 @@
 // Core functionality for the game
-use bevy::{app::App, prelude::{Plugin, Commands}};
+use bevy::{app::App, prelude::{Plugin, Commands, Res}};
 use chrono::NaiveDate;
 
 use crate::core::player::setup_player;
 use crate::core::hobby::get_initial_hobbies;
 
-use self::{occupation::meet_coworkers, time::CurrentDateTime, hobby::{Hobbies, Hobby, club::{Club, meet_club_members, register_club_members}}};
+use self::occupation::{meet_coworkers, get_initial_occupations, Occupations};
+use self::time::CurrentDateTime;
+use self::hobby::club::meet_club_members;
 
 pub mod person;
 pub mod occupation;
@@ -22,16 +24,16 @@ impl Plugin for CorePlugin {
         app
             .insert_resource(CurrentDateTime(NaiveDate::from_ymd_opt(2023, 3, 5).unwrap().and_hms_opt(0, 0, 0).unwrap()))
             .insert_resource(get_initial_hobbies())
+            .insert_resource(get_initial_occupations())
 
             .add_startup_system(setup_player)
 
             .add_system(meet_coworkers)
-            .add_system(meet_club_members)
-            .add_system(register_club_members);
+            .add_system(meet_club_members);
     }
 }
 
 // Trait to define something that can be populated
 pub trait Populatable {
-    fn populate(&self, commands: Commands);
+    fn populate(&self, commands: &mut Commands, occupations: Res<Occupations>);
 }
