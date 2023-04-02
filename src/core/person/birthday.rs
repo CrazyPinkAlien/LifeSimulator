@@ -1,6 +1,13 @@
 // Functionality for storing birthdays
-use bevy::prelude::Component;
+use bevy::prelude::{Component, Res};
 use chrono::NaiveDate;
+
+use crate::core::{Randomisable, occupation::Occupations};
+
+// Trait to get the age of an entity
+pub trait HasAge {
+    fn get_age(&self, current_date: NaiveDate) -> u32;
+}
 
 // Components
 
@@ -8,11 +15,6 @@ use chrono::NaiveDate;
 #[derive(Component, Copy, Clone, PartialEq)]
 pub struct Birthday {
     pub date: NaiveDate,
-}
-
-// Trait to get the age of an entity
-pub trait HasAge {
-    fn get_age(&self, current_date: NaiveDate) -> u32;
 }
 
 // Implementation of HasAge for the Birthday component
@@ -27,7 +29,9 @@ impl HasAge for Birthday {
     }
 }
 
-pub fn random_birthday() -> Birthday {
-    // TODO: Make this random
-    return Birthday { date: NaiveDate::from_ymd_opt(1995, 6, 16).unwrap()};
+impl Randomisable for Birthday {
+    fn get_random(_occupations: &Res<Occupations>) -> Self {
+        // TODO: Make this random
+        return Birthday { date: NaiveDate::from_ymd_opt(1995, 6, 16).unwrap()};
+    }
 }

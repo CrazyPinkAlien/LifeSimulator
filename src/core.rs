@@ -1,11 +1,9 @@
 // Core functionality for the game
 use bevy::{app::App, prelude::{Plugin, Commands, Res}};
-use chrono::NaiveDate;
 
 use crate::core::player::setup_player;
-use crate::core::hobby::get_initial_hobbies;
 
-use self::occupation::{meet_coworkers, get_initial_occupations, Occupations};
+use self::{occupation::{meet_coworkers, Occupations}, hobby::club::Clubs};
 use self::time::CurrentDateTime;
 use self::hobby::club::meet_club_members;
 
@@ -22,9 +20,9 @@ pub struct CorePlugin;
 impl Plugin for CorePlugin {
     fn build(&self, app: &mut App) {
         app
-            .insert_resource(CurrentDateTime(NaiveDate::from_ymd_opt(2023, 3, 5).unwrap().and_hms_opt(0, 0, 0).unwrap()))
-            .insert_resource(get_initial_hobbies())
-            .insert_resource(get_initial_occupations())
+            .init_resource::<CurrentDateTime>()
+            .init_resource::<Clubs>()
+            .init_resource::<Occupations>()
 
             .add_startup_system(setup_player)
 
@@ -35,5 +33,10 @@ impl Plugin for CorePlugin {
 
 // Trait to define something that can be populated
 pub trait Populatable {
-    fn populate(&self, commands: &mut Commands, occupations: Res<Occupations>);
+    fn populate(&self, commands: &mut Commands, occupations: &Res<Occupations>);
+}
+
+// Something that can create a random value of itself
+pub trait Randomisable {
+    fn get_random(occupations: &Res<Occupations>) -> Self;
 }

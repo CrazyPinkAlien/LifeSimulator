@@ -8,9 +8,9 @@ use bevy_egui::egui::{CentralPanel, SidePanel, DragValue, ProgressBar, Window};
 use bevy_egui::egui::widgets::Button;
 use chrono::{Datelike, NaiveDate};
 
-use crate::core::hobby::Hobbies;
+use crate::core::hobby::club::{Clubs, PersonalClubs};
 use crate::core::time::CurrentDateTime;
-use crate::core::occupation::Occupation;
+use crate::core::occupation::PersonalOccupation;
 use crate::core::person::Name;
 use crate::core::person::birthday::{Birthday, HasAge};
 use crate::core::player::Player;
@@ -83,13 +83,13 @@ fn main_menu_ui(ui_state: Res<CurrentUIState>, date_time: Res<CurrentDateTime>, 
 }
 
 // UI showing player info
-fn player_info_ui(ui_state: Res<CurrentUIState>, date_time: Res<CurrentDateTime>, mut egui_context: ResMut<EguiContext>, mut player_query: Query<(&mut Name, &mut Birthday, &Occupation), With<Player>>) {
+fn player_info_ui(ui_state: Res<CurrentUIState>, date_time: Res<CurrentDateTime>, mut egui_context: ResMut<EguiContext>, mut player_query: Query<(&mut Name, &mut Birthday, &PersonalOccupation), With<Player>>) {
     if ui_state.0 == UIState::PlayerInfo && !player_query.is_empty() {
         // Get player info
         let player_info = player_query.single_mut();
         let mut player_name = player_info.0;
         let mut player_bday = player_info.1;
-        let occupation = player_info.2;
+        let player_occupation = player_info.2;
         // Variables for player birthday
         let mut birth_year = player_bday.date.year();
         let mut birth_month = player_bday.date.month();
@@ -115,6 +115,7 @@ fn player_info_ui(ui_state: Res<CurrentUIState>, date_time: Res<CurrentDateTime>
             ui.label(player_bday.get_age(date_time.0.date()).to_string());
             // Occupation
             ui.label("Occupation:");
+            ui.label(&player_occupation.occupation.name)
         });
         // Update birthday
         *player_bday = Birthday { date: NaiveDate::from_ymd_opt(birth_year, birth_month, birth_day).unwrap() };
@@ -122,10 +123,10 @@ fn player_info_ui(ui_state: Res<CurrentUIState>, date_time: Res<CurrentDateTime>
 }
 
 // UI for the social menu
-fn social_menu_ui(ui_state: Res<CurrentUIState>, mut player_query: Query<&mut Relationships, With<Player>>, mut egui_context: ResMut<EguiContext>, hobbies: Res<Hobbies>) {
+fn social_menu_ui(ui_state: Res<CurrentUIState>, mut player_query: Query<(&mut Relationships, &mut PersonalClubs), With<Player>>, mut egui_context: ResMut<EguiContext>, clubs: Res<Clubs>) {
     if ui_state.0 == UIState::Social && !player_query.is_empty() {
         // Get player relationships
-        let mut relationships = player_query.single_mut();
+        let (mut relationships, mut personal_clubs) = player_query.single_mut();
         // Draw UI
         CentralPanel::default().show(egui_context.ctx_mut(), |ui| {
             // Title
@@ -147,11 +148,9 @@ fn social_menu_ui(ui_state: Res<CurrentUIState>, mut player_query: Query<&mut Re
                 if columns[1].add(Button::new("Join Club")).clicked() {
                     Window::new("clubs_window").show(egui_context.ctx_mut(), |ui| {
                         ui.label("Clubs");
-                        for hobby in &hobbies.hobbies {
-                            if hobby.clubs.len() > 0 {
-                                if columns[1].add(Button::new(hobby.name.clone())).clicked() {
-                                    
-                                }
+                        for club in &clubs.clubs {
+                            if columns[1].add(Button::new(club.name.clone())).clicked() {
+                                personal_clubs.clubs.push(club);
                             }
                         }
                     });
